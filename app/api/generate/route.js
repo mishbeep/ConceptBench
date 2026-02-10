@@ -1,3 +1,5 @@
+export const runtime = "edge";
+
 import { getAllToolIds, getTool } from "@/lib/tools/toolConfig.js";
 import { simulateToolOutput } from "@/lib/tools/simulateTool.js";
 import { runAgent } from "@/lib/runAgent.js";
