@@ -1,3 +1,5 @@
+export const runtime = "nodejs";   // forces Node runtime
+export const maxDuration = 60;    // serverless gives 120 sec
 
 import { getAllToolIds, getTool } from "@/lib/tools/toolConfig.js";
 import { simulateToolOutput } from "@/lib/tools/simulateTool.js";
@@ -5,7 +7,7 @@ import { runAgent } from "@/lib/runAgent.js";
 import { computeDivergence } from "@/lib/divergence.js";
 import { buildToolInsights } from "@/lib/insights.js";
 
-export const maxDuration = 60;
+
 
 export async function POST(request) {
   try {
@@ -23,25 +25,56 @@ export async function POST(request) {
     for (const toolId of toolIds) {
       const tool = getTool(toolId);
       if (!tool) continue;
-
-      const output = await simulateToolOutput({ toolId, task, constraints });
-      const pragmatistReview = await runAgent({ agent: "pragmatist", toolOutput: output });
-      const explorerReview = await runAgent({ agent: "explorer", toolOutput: output });
-      const divergence = await computeDivergence({ pragmatistReview, explorerReview });
-      const insights = await buildToolInsights({
+    
+      // Kick off the tool output generation
+      const outputPromise = simulateToolOutput({ toolId, task, constraints });
+    
+      // Wait for the tool output
+      const output = await outputPromise;
+    
+      // Run agent reviews in parallel
+      const pragPromise = runAgent({
+        agent: "pragmatist",
+        toolOutput: output,
+      });
+    
+      const explPromise = runAgent({
+        agent: "explorer",
+        toolOutput: output,
+      });
+    
+      const [pragmatistReview, explorerReview] = await Promise.all([
+        pragPromise,
+        explPromise,
+      ]);
+    
+      // Run divergence + insights in parallel
+      const divergencePromise = computeDivergence({
+        pragmatistReview,
+        explorerReview,
+      });
+    
+      const insightsPromise = buildToolInsights({
         toolName: tool.name,
         toolOutput: output,
         pragmatistReview,
-        explorerReview
+        explorerReview,
       });
-
+    
+      const [divergence, insights] = await Promise.all([
+        divergencePromise,
+        insightsPromise,
+      ]);
+    
+      // Attach to result
       result.tools[toolId] = {
         output,
         reviews: { pragmatist: pragmatistReview, explorer: explorerReview },
         divergence,
-        insights
+        insights,
       };
     }
+    
 
     return Response.json(result);
   } catch (err) {
