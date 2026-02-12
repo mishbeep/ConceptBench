@@ -5,12 +5,26 @@ import { useRouter } from "next/navigation";
 import { getAllToolIds, getTool } from "@/lib/tools/toolConfig.js";
 
 const RESULT_KEY = "conceptbench_result";
+function PipelineRow({ active, label, sublabel }) {
+  return (
+    <div className="cb-row">
+      <div className={`cb-pipeline-dot ${active ? "active" : ""}`} />
+      <div>
+        <div className="cb-row-label">{label}</div>
+        <div className="cb-row-sub">{sublabel}</div>
+      </div>
+    </div>
+  );
+}
+
 
 export default function InitializePage() {
   const router = useRouter();
   const [task, setTask] = useState("");
   const [constraints, setConstraints] = useState("");
   const [loading, setLoading] = useState(false);
+  const [stage, setStage] = useState(0);
+
   const [error, setError] = useState("");
 
   const toolIds = getAllToolIds();
@@ -23,6 +37,10 @@ export default function InitializePage() {
       return;
     }
     setLoading(true);
+setStage(1);
+
+setTimeout(() => setStage(2), 1200);
+setTimeout(() => setStage(3), 2400);
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -48,7 +66,36 @@ export default function InitializePage() {
 
   return (
     <div className="col-centered cb-layout font-body" style={pageStyle}>
-      {loading ? <div className="page-loading-overlay" aria-hidden /> : null}
+      {loading && (
+  <div className="cb-loading-overlay">
+    <div className="cb-pipeline">
+      <h2 className="cb-pipeline-title">
+        Running bench test…
+      </h2>
+
+      <PipelineRow
+        active={stage >= 1}
+        label="Simulating tools"
+        sublabel="Lovable + Google Stitch"
+      />
+
+      <PipelineRow
+        active={stage >= 2}
+        label="Running evaluation lenses"
+        sublabel="Viability + Differentiation"
+      />
+
+      <PipelineRow
+        active={stage >= 3}
+        label="Computing lens tension & insights"
+        sublabel="Comparing perspectives"
+      />
+    </div>
+  </div>
+)}
+
+
+
       <h1 style={titleStyle}>ConceptBench</h1>
       <p style={subtitleStyle}>
         Bench-test AI product-design tools by comparing simulated outputs and

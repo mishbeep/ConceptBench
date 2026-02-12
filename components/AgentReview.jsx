@@ -22,27 +22,23 @@ export default function AgentReview({ toolId, reviews }) {
         <div className="agent-card fade-in">
           <div className="cb-card-eyebrow">Agent review</div>
           <div className="agent-label">
-            {tool.name} — The Pragmatist
-            <span className="agent-tooltip-trigger">
-              <span className="agent-tooltip-icon">ⓘ</span>
-              <span className="agent-tooltip">
-                Evaluates output based on speed to value, clarity, and practical feasibility.
-              </span>
-            </span>
-          </div>
+  {tool.name} — Viability Lens
+</div>
+<div className="agent-lens-sub">
+  Evaluates execution quality — clarity, feasibility, and implementation risk.
+</div>
+
           <AgentReviewCard reviewText={pragmatist} />
         </div>
         <div className="agent-card fade-in">
           <div className="cb-card-eyebrow">Agent review</div>
           <div className="agent-label">
-            {tool.name} — The Explorer
-            <span className="agent-tooltip-trigger">
-              <span className="agent-tooltip-icon">ⓘ</span>
-              <span className="agent-tooltip">
-                Evaluates output based on novelty, differentiation, and long-term creative potential.
-              </span>
-            </span>
-          </div>
+  {tool.name} — Differentiation Lens
+</div>
+<div className="agent-lens-sub">
+  Evaluates strategic distinctiveness — originality, positioning, and long-term leverage.
+</div>
+
           <AgentReviewCard reviewText={explorer} />
         </div>
       </div>
